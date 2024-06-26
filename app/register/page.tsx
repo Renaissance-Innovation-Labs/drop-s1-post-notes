@@ -2,31 +2,44 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { SubmitButton } from "./submit-button";
+import { SubmitButton } from "../login/submit-button";
 
 export default function Login({
 	searchParams,
 }: {
 	searchParams: { message: string };
 }) {
-	const signIn = async (formData: FormData) => {
+	const signUp = async (formData: FormData) => {
 		"use server";
 
+		const origin = headers().get("origin");
 		const email = formData.get("email") as string;
-
+		const firstName = formData.get("firstName") as string;
+		const lastName = formData.get("lastName") as string;
 		const password = formData.get("password") as string;
 		const supabase = createClient();
 
-		const { error } = await supabase.auth.signInWithPassword({
+		const { error } = await supabase.auth.signUp({
 			email,
 			password,
+			options: {
+				data: { firstName, lastName },
+				emailRedirectTo: `${origin}/auth/callback`,
+			},
 		});
 
 		if (error) {
-			return redirect("/login?message=Check email and password");
+			console.log(error);
+			return redirect("/login?message=Could not authenticate user");
 		}
 
-		return redirect("/dashboard");
+		return redirect("/login?message=Check email to continue sign in process");
+	};
+
+	const signIn = async (formData: FormData) => {
+		"use server";
+
+		return redirect("/login");
 	};
 
 	return (
@@ -57,33 +70,52 @@ export default function Login({
 					Email
 				</label>
 				<input
-					className="rounded-md px-4 py-2 bg-inherit border mb-6"
+					className="rounded-md px-4 py-2 bg-inherit border mb-4"
 					name="email"
 					placeholder="you@example.com"
+					required
+				/>
+				<label className="text-md" htmlFor="firstName">
+					First Name
+				</label>
+				<input
+					className="rounded-md px-4 py-2 bg-inherit border mb-4"
+					name="firstName"
+					placeholder="Your first name"
+					required
+				/>
+				<label className="text-md" htmlFor="lastName">
+					Last Name
+				</label>
+				<input
+					className="rounded-md px-4 py-2 bg-inherit border mb-4"
+					name="lastName"
+					placeholder="Your last name"
 					required
 				/>
 				<label className="text-md" htmlFor="password">
 					Password
 				</label>
 				<input
-					className="rounded-md px-4 py-2 bg-inherit border mb-6"
+					className="rounded-md px-4 py-2 bg-inherit border mb-4"
 					type="password"
 					name="password"
 					placeholder="••••••••"
 					required
 				/>
 				<SubmitButton
-					formAction={signIn}
+					formAction={signUp}
 					className="bg-green-700 rounded-md px-4 py-2 text-foreground mb-2"
-					pendingText="Signing In..."
-				>
-					Sign In
-				</SubmitButton>
-				<Link
-					href="/register"
-					className="border border-foreground/20 text-center rounded-md px-4 py-2 text-foreground mb-2"
+					pendingText="Signing Up..."
 				>
 					Sign Up
+				</SubmitButton>
+
+				<Link
+					href="/login"
+					className="border border-foreground/20 rounded-md text-center px-4 py-2 text-foreground mb-2"
+				>
+					Sign In
 				</Link>
 				{searchParams?.message && (
 					<p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
