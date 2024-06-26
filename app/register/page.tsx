@@ -24,7 +24,7 @@ export default function Login({
 			password,
 			options: {
 				data: { firstName, lastName },
-				emailRedirectTo: `${origin}/auth/callback`,
+				emailRedirectTo: `https://${process.env.VERCEL_URL}/auth/callback`,
 			},
 		});
 
