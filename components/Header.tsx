@@ -6,14 +6,13 @@ export default function Header() {
 	return (
 		<div className="flex flex-col items-center pt-10">
 			<h1 className="mb-4 text-3xl lg:text-4xl font-semibold !leading-tight mx-auto max-w-xl text-center">
-				Strengthen Your Connections with Meaningful Notes
+				Enhance Your Bonds with Thoughtful Notes
 			</h1>
 			<h3 className="text-center mb-10">
-				At Post Notes, we believe in the power of written words to build and
-				nurture relationships. Our platform allows you to create pairings with
-				friends, spouses, family members, or anyone you care about. Once paired,
-				you can exchange notes that express your thoughts, appreciation, or even
-				complaints in a constructive manner.
+				Post Notes helps you deepen relationships by enabling meaningful written
+				exchanges. Connect with friends, family, and loved ones to share your
+				thoughts, gratitude, and even constructive feedback, all designed to
+				strengthen your connections and improve communication.
 			</h3>
 			<Image src={notesImage} alt="View of notes" />
 			<div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent mb-8" />

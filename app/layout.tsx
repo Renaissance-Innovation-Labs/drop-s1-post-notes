@@ -11,7 +11,8 @@ const defaultUrl = process.env.VERCEL_URL
 export const metadata = {
 	metadataBase: new URL(defaultUrl),
 	title: "Post Notes",
-	description: "Post notes to people, express your thoughts, appreciation, or even complaints in a constructive manner.",
+	description:
+		"Post notes to people, express your thoughts, appreciation, or even complaints in a constructive manner.",
 };
 
 const inter = Inter({
