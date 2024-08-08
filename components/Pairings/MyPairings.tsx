@@ -12,7 +12,9 @@ const MyPairings = () => {
 	const { data: pairings, isLoading } = useUserPairings();
 
 	const pendingRequests = pairings?.filter(
-		(pairing) => pairing.status === "pending"
+		(pairing) =>
+			pairing.status === "pending" &&
+			pairing.receiver_email === user?.user?.email
 	);
 
 	return (
@@ -38,6 +40,7 @@ const MyPairings = () => {
 								<p className="text-center">
 									You do not have any Pending Requests
 								</p>
+								{/* <p className="text-center">Add a new pair above</p> */}
 							</div>
 						) : (
 							<div className="grid md:grid-cols-3 gap-4">

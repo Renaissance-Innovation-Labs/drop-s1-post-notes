@@ -2,6 +2,7 @@
 import { acceptPairingRequest } from "@/utils/pairings";
 import { toastError, toastSuccess } from "@/components/toast";
 import { useState } from "react";
+import { useUser } from "@/app/api/queries";
 
 export default function PairingRequestCard({
 	request,
@@ -11,6 +12,8 @@ export default function PairingRequestCard({
 	isRecipient: boolean;
 }) {
 	const [acceptingRequest, setAcceptingRequest] = useState(false);
+	const { data: user } = useUser();
+	console.log(request);
 
 	const acceptRequest = async () => {
 		setAcceptingRequest(true);
@@ -31,9 +34,16 @@ export default function PairingRequestCard({
 	return (
 		<div className="rounded-md border border-black/5 bg-white/5 p-4 backdrop-blur-2xl">
 			<div className="flex items-center justify-between mb-4">
-				<h3 className="font-medium text-base">
-					{request.sender.firstName} {request.sender.lastName}
-				</h3>
+				{isRecipient ? (
+					<h3 className="font-medium text-base">
+						{request.sender.firstName} {request.sender.lastName}
+					</h3>
+				) : (
+					<h3 className="font-medium text-base">
+						{user?.user?.user_metadata?.firstName}{" "}
+						{user?.user?.user_metadata?.lastName}
+					</h3>
+				)}
 				<p className="py-0.5 px-2 bg-yellow-50 w-fit rounded-md font-medium text-yellow-700 text-xs">
 					Pending
 				</p>
