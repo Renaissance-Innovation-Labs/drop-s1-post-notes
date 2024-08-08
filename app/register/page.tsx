@@ -1,7 +1,10 @@
+"use client";
+
+import { toastError, toastSuccess } from "@/components/toast";
 import Link from "next/link";
-import { headers } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { signUp } from "../api/auth";
 import { SubmitButton } from "../login/submit-button";
 
 export default function Login({
@@ -9,37 +12,25 @@ export default function Login({
 }: {
 	searchParams: { message: string };
 }) {
-	const signUp = async (formData: FormData) => {
-		"use server";
+	const router = useRouter();
+	const [signingUp, setSigningUp] = useState(false);
 
-		const origin = headers().get("origin");
-		const email = formData.get("email") as string;
-		const firstName = formData.get("firstName") as string;
-		const lastName = formData.get("lastName") as string;
-		const password = formData.get("password") as string;
-		const supabase = createClient();
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
 
-		const { error } = await supabase.auth.signUp({
-			email,
-			password,
-			options: {
-				data: { firstName, lastName },
-				emailRedirectTo: `${origin}/auth/callback`,
-			},
-		});
+		setSigningUp(true);
+		const result = await signUp(formData);
 
-		if (error) {
-			console.log(error);
-			return redirect("/login?message=Could not authenticate user");
+		if (result.type === "success") {
+			toastSuccess(result.message);
+			setSigningUp(false);
+			// Optional: redirect to another page
+			router.push("/login");
+		} else if (result.type === "error") {
+			toastError(result.message);
+			setSigningUp(false);
 		}
-
-		return redirect("/login?message=Check email to continue sign in process");
-	};
-
-	const signIn = async (formData: FormData) => {
-		"use server";
-
-		return redirect("/login");
 	};
 
 	return (
@@ -65,7 +56,10 @@ export default function Login({
 				Back
 			</Link>
 
-			<form className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
+			<form
+				onSubmit={handleSubmit}
+				className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
+			>
 				<label className="text-md" htmlFor="email">
 					Email
 				</label>
@@ -104,11 +98,13 @@ export default function Login({
 					required
 				/>
 				<SubmitButton
-					formAction={signUp}
+					aria-disabled={signingUp}
+					type="submit"
+					disabled={signingUp}
 					className="bg-green-700 rounded-md px-4 py-2 text-white mb-2"
 					pendingText="Signing Up..."
 				>
-					Sign Up
+					{signingUp ? "Signing up" : "Sign Up"}
 				</SubmitButton>
 
 				<Link

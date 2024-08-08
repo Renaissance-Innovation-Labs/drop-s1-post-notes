@@ -1,5 +1,5 @@
+import { useUser } from "@/app/api/queries";
 import { Caveat } from "next/font/google";
-import { getUser } from "@/utils/user";
 
 const caveat = Caveat({
 	subsets: ["latin"],
@@ -14,12 +14,11 @@ const shadowStyle = {
 		"-1px 10px 20px 0px rgba(0, 0, 0, 0.3), 52px 0px 6px rgba(0, 0, 0, 0.1)",
 };
 
-const NoteCard = async ({ note }: { note: any }) => {
-	const { user, error } = await getUser();
+const NoteCard = ({ note }: { note: any }) => {
+	const { data: user, error } = useUser();
 
-	const isRecipient = user?.id === note.receiver_id;
+	const isRecipient = user?.user?.id === note.receiver_id;
 	const sentiment = note?.sentiment;
-	console.log("sentiment", sentiment);
 
 	return (
 		<div
@@ -49,7 +48,9 @@ const NoteCard = async ({ note }: { note: any }) => {
 
 			{/* Paper */}
 			<section className="p-4 px-2">
-				<p className={`whitespace-pre-line ${caveat.className}`}>
+				<p
+					className={`whitespace-pre-line text-lg leading-snug ${caveat.className}`}
+				>
 					{note?.content}
 				</p>
 

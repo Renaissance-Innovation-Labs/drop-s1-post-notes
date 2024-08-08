@@ -3,6 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import StyledComponentsRegistry from "@/lib/registry";
 import ToastProvider from "@/components/ToastProvider";
+import QueryProvider from "./api/QueryProvider";
 
 const defaultUrl = process.env.VERCEL_URL
 	? `https://${process.env.VERCEL_URL}`
@@ -28,12 +29,14 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={inter.className}>
 			<body className="bg-background text-foreground">
-				<StyledComponentsRegistry>
-					<main className="min-h-screen flex flex-col items-center">
-						{children}
-					</main>
-					<ToastProvider />
-				</StyledComponentsRegistry>
+				<QueryProvider>
+					<StyledComponentsRegistry>
+						<main className="min-h-screen flex flex-col items-center">
+							{children}
+						</main>
+						<ToastProvider />
+					</StyledComponentsRegistry>
+				</QueryProvider>
 			</body>
 		</html>
 	);

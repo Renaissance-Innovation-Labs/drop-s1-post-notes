@@ -12,3 +12,9 @@ export const getUser = async () => {
 
 	return { user, error };
 };
+
+export const getUserQuery = async () => {
+	const supabase = createClient();
+
+	return supabase.auth.getUser();
+};

@@ -2,6 +2,26 @@
 
 import { createClient } from "./supabase/server";
 
+export const getNotesQuery = async () => {
+	const supabase = createClient();
+
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+
+	if (userError) {
+		return { error: userError };
+	}
+
+	return supabase
+		.from("notes")
+		.select("*")
+		.or(`receiver_id.eq.${user?.id}, sender_id.eq.${user?.id}`)
+		.order("created_at", { ascending: false })
+		.throwOnError();
+};
+
 export const getUserNotes = async () => {
 	const supabase = createClient();
 

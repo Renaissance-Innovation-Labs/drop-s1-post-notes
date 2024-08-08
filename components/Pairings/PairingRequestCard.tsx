@@ -3,7 +3,13 @@ import { acceptPairingRequest } from "@/utils/pairings";
 import { toastError, toastSuccess } from "@/components/toast";
 import { useState } from "react";
 
-export default function PairingRequestCard({ request }: { request: any }) {
+export default function PairingRequestCard({
+	request,
+	isRecipient,
+}: {
+	request: any;
+	isRecipient: boolean;
+}) {
 	const [acceptingRequest, setAcceptingRequest] = useState(false);
 
 	const acceptRequest = async () => {
@@ -16,9 +22,7 @@ export default function PairingRequestCard({ request }: { request: any }) {
 		if (result.type === "success") {
 			toastSuccess(result.message);
 			setAcceptingRequest(false);
-			window.location.reload();
 		} else if (result.type === "error") {
-			console.log(result);
 			toastError(result.message);
 			setAcceptingRequest(false);
 		}
@@ -37,14 +41,16 @@ export default function PairingRequestCard({ request }: { request: any }) {
 			<p className="text-sm mb-4">
 				Would you be willing to post notes together?
 			</p>
-			<button
-				className="border border-foreground/10 hover:bg-foreground/5 text-center rounded-md px-4 py-1 text-foreground text-sm disabled:cursor-not-allowed"
-				type="button"
-				aria-disabled={acceptingRequest}
-				onClick={acceptRequest}
-			>
-				{acceptingRequest ? "Accepting" : "Accept Request"}
-			</button>
+			{isRecipient && (
+				<button
+					className="border border-foreground/10 hover:bg-foreground/5 text-center rounded-md px-4 py-1 text-foreground text-sm disabled:cursor-not-allowed"
+					type="button"
+					aria-disabled={acceptingRequest}
+					onClick={acceptRequest}
+				>
+					{acceptingRequest ? "Accepting" : "Accept Request"}
+				</button>
+			)}
 		</div>
 	);
 }

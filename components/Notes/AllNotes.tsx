@@ -1,15 +1,16 @@
-import { getUserPairings } from "@/utils/pairings";
-import Link from "next/link";
-import PairingRequestCard from "../Pairings/PairingRequestCard";
+"use client";
 import { getUserNotes } from "@/utils/notes";
+import Link from "next/link";
 import NoteCard from "./NoteCard";
+import { useUserNotes } from "@/app/api/queries";
+import { Key } from "react";
 
-const AllNotes = async () => {
-	const { notes, error } = await getUserNotes();
+const AllNotes = () => {
+	// const { notes, error } = await getUserNotes();
+	const { data: notes, isLoading } = useUserNotes();
+	const columns: any[] = [[], [], []];
 
-	// const pendingRequests = pairings?.filter(
-	// 	(pairing) => pairing.status === "pending"
-	// );
+	notes?.forEach((note, index) => columns[index % 3].push(note));
 
 	return (
 		<div className="gap-4 w-full border border-black/5 p-4 rounded-xl">
@@ -22,22 +23,33 @@ const AllNotes = async () => {
 					Send new note
 				</Link>
 			</div>
-			{Array.isArray(notes) && (
+			{isLoading ? (
+				<div className="py-6">
+					<p className="text-center">Fetching notes...</p>
+				</div>
+			) : (
 				<>
-					{notes?.length < 1 ? (
-						<div className="py-6">
-							<p className="text-center">You do not have any notes yet.</p>
-							<p className="text-center">
-								Your notes will appear here once you recieve any
-							</p>
-							{/* <p className="text-center">Add a new pair above</p> */}
-						</div>
-					) : (
-						<div className="grid md:grid-cols-3 gap-4">
-							{notes.map((note) => (
-								<NoteCard key={note.id} note={note} />
-							))}
-						</div>
+					{Array.isArray(notes) && (
+						<>
+							{notes?.length < 1 ? (
+								<div className="py-6">
+									<p className="text-center">You do not have any notes yet.</p>
+									<p className="text-center">
+										Your notes will appear here once you recieve any
+									</p>
+								</div>
+							) : (
+								<div className="grid md:grid-cols-3 gap-4">
+									{columns.map((column, colIndex) => (
+										<div key={colIndex} className="space-y-4">
+											{column.map((note: { id: Key | null | undefined }) => (
+												<NoteCard key={note.id} note={note} />
+											))}
+										</div>
+									))}
+								</div>
+							)}
+						</>
 					)}
 				</>
 			)}

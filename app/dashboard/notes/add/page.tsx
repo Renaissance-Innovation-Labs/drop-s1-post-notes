@@ -1,15 +1,27 @@
 "use client";
-import Link from "next/link";
+import { useUser, useUserPairings } from "@/app/api/queries";
 import { SubmitButton } from "@/app/login/submit-button";
-import { getUserPairings, sendPairingRequest } from "@/utils/pairings";
 import { toastError, toastSuccess } from "@/components/toast";
-import { SetStateAction, useEffect, useState } from "react";
-import { getUser } from "@/utils/user";
 import { sendNote } from "@/utils/notes";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function AddNote() {
 	const [sendingNote, setSendingNote] = useState(false);
-	const [recipients, setRecipients] = useState<any[]>([]);
+	const recipients: any[] = [];
+
+	const { data: user } = useUser();
+	const { data: pairings, error } = useUserPairings();
+
+	pairings
+		?.filter((pairing) => pairing.status === "accepted")
+		.forEach((pairing) => {
+			if (pairing.sender_id === user?.user?.id) {
+				recipients.push(pairing.recipient);
+			} else {
+				recipients.push(pairing.sender);
+			}
+		});
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -21,39 +33,12 @@ export default function AddNote() {
 		if (result.type === "success") {
 			toastSuccess(result.message);
 			setSendingNote(false);
-			// Optional: redirect to another page
 			window.location.href = result.redirectUrl || "/dashboard";
 		} else if (result.type === "error") {
 			toastError(result.message);
 			setSendingNote(false);
 		}
 	};
-
-	const getActivePairings = async () => {
-		const { user, error: userError } = await getUser();
-		const { pairings, error } = await getUserPairings();
-		const recipients: SetStateAction<any[]> = [];
-
-		if (userError) {
-			toastError(userError.message);
-		}
-
-		pairings
-			?.filter((pairing) => pairing.status === "accepted")
-			.forEach((pairing) => {
-				if (pairing.sender_id === user?.id) {
-					recipients.push(pairing.recipient);
-				} else {
-					recipients.push(pairing.sender);
-				}
-			});
-
-		setRecipients(recipients);
-	};
-
-	useEffect(() => {
-		getActivePairings();
-	}, []);
 
 	return (
 		<div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">

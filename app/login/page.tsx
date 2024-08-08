@@ -1,32 +1,33 @@
+"use client";
+
+import { toastError } from "@/components/toast";
 import Link from "next/link";
-import { headers } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { useState } from "react";
+import { login } from "../api/auth";
 import { SubmitButton } from "./submit-button";
+import { useRouter } from "next/navigation";
 
 export default function Login({
 	searchParams,
 }: {
 	searchParams: { message: string };
 }) {
-	const signIn = async (formData: FormData) => {
-		"use server";
+	const router = useRouter();
+	const [loggingIn, setLoggingIn] = useState(false);
 
-		const email = formData.get("email") as string;
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
 
-		const password = formData.get("password") as string;
-		const supabase = createClient();
+		setLoggingIn(true);
+		const result = await login(formData);
 
-		const { error } = await supabase.auth.signInWithPassword({
-			email,
-			password,
-		});
-
-		if (error) {
-			return redirect("/login?message=Check email and password");
+		if (result.type === "success") {
+			router.push("/dashboard");
+		} else if (result.type === "error") {
+			toastError(result.message);
+			setLoggingIn(false);
 		}
-
-		return redirect("/dashboard");
 	};
 
 	return (
@@ -52,7 +53,10 @@ export default function Login({
 				Back
 			</Link>
 
-			<form className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
+			<form
+				onSubmit={handleSubmit}
+				className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
+			>
 				<label className="text-md" htmlFor="email">
 					Email
 				</label>
@@ -73,11 +77,13 @@ export default function Login({
 					required
 				/>
 				<SubmitButton
-					formAction={signIn}
+					aria-disabled={loggingIn}
+					type="submit"
+					disabled={loggingIn}
 					className="bg-green-700 rounded-md px-4 py-2 text-white mb-2"
-					pendingText="Signing In..."
+					pendingText="Logging In..."
 				>
-					Sign In
+					{loggingIn ? "Signing in" : "Sign in"}
 				</SubmitButton>
 				<Link
 					href="/register"

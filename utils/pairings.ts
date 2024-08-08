@@ -1,9 +1,28 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "./supabase/server";
 
-export const getUserPairings = async () => {
+export const getPairingsByUserId = async () => {
+	const supabase = createClient();
+
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+
+	if (userError) {
+		// toastError("An error occured! Please try again");
+		return { pairings: [], error: userError };
+	}
+
+	return supabase
+		.from("pairings")
+		.select("*")
+		.or(`receiver_email.eq.${user?.email}, sender_id.eq.${user?.id}`)
+		.throwOnError();
+};
+
+export const useGetPairings = async () => {
 	const supabase = createClient();
 
 	const {
@@ -24,6 +43,23 @@ export const getUserPairings = async () => {
 	// .eq("status", "pending");
 
 	return { pairings, error: pairingsError };
+
+	// const query = useQuery({
+	// 	queryKey: ["pairings", user?.id],
+	// 	queryFn: async () => {
+	// 		return (
+	// 			supabase
+	// 				.from("pairings")
+	// 				.select("*")
+	// 				// .eq("receiver_email", user?.email)
+	// 				.or(`receiver_email.eq.${user?.email}, sender_id.eq.${user?.id}`)
+	// 				// .eq("status", "pending");
+	// 				.then((result) => result.data)
+	// 		);
+	// 	},
+	// });
+
+	// return { pairings: query.data, error: query.error };
 };
 
 export const sendPairingRequest = async (formData: FormData) => {
